@@ -1,1 +1,42 @@
+Mandatory Books to Read
+------------------------
 
+Mandatory
+---------
+PostgreSQL 13 Cookbook - Vallarapu Naga Avinash Kumar
+Troubleshooting PostgreSQL - Hans-Jürgen Schönig
+PostgreSQL Configuration - Baji Skaik
+
+
+Basic SQL and Administration 
+-----------------------------
+Learning PostgreSQL - Salahaldin Juba
+Learn PostgreSQL - Luca Ferrari
+The art of PostgreSQL - Dimitri Fontaine
+
+
+High Availability
+------------------
+PostgreSQL High Availability Cookbook - Shaun M. Thomas
+
+
+AWS and Cloud
+--------------
+Beginning PostgreSQL on the Cloud - Baji Shaik
+Oracle to Aurora PostgreSQL Migration Playbook - AWS Guide
+Amazon aurora labs for PostgreSQL - AWS
+
+
+OS and Database Tuning
+----------------------
+PostgreSQL 9.6 High Performance - Ibrar Ahmed
+
+
+Application Tuning
+------------------
+PostgreSQL Query Optimization - Henrietta Dombrovskaya
+
+
+Application Development
+-----------------------
+Developing Modern Database Applications with PostgreSQL - Dr. Quan Ha Le
