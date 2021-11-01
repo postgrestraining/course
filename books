@@ -5,7 +5,6 @@ Mandatory
 ---------
 PostgreSQL 13 Cookbook - Vallarapu Naga Avinash Kumar
 Troubleshooting PostgreSQL - Hans-Jürgen Schönig
-PostgreSQL Configuration - Baji Skaik
 
 
 Basic SQL and Administration 
@@ -53,4 +52,5 @@ People to follow
 
 Luca Ferrari
 Robert Haas
+Avinash
 
