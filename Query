@@ -1,1 +1,41 @@
-explain analyze SELECT e.matricule, e.nom, e.prenom FROM employes e  WHERE e.num_service in (select num_service from employes e where e.num_service=4);
+explain analyze 
+SELECT 
+  e.matricule, 
+  e.nom, 
+  e.prenom 
+FROM 
+  employes e 
+WHERE 
+  e.num_service in (
+    select 
+      num_service 
+    from 
+      employes e 
+    where 
+      e.num_service = 4
+  );
+
+SELECT e.matricule, e.nom, e.prenom
+FROM employes e
+LEFT JOIN services s
+ON (e.num_service = s.num_service)
+WHERE e.num_service = 4 ;
+
+SELECT e.matricule, e.nom, e.prenom
+FROM employes e
+LEFT JOIN services s
+ON (e.num_service = s.num_service)
+WHERE s.num_service = 4;
+
+SELECT e.matricule, e.nom, e.prenom FROM employes e  WHERE e.num_service =4 ;
+
+SELECT e.matricule, e.nom, e.prenom FROM employes e  WHERE e.num_service in (select num_service from employes e where e.num_service=4);
+
+WITH service_employees AS (
+    SELECT num_service
+    FROM employes
+    WHERE num_service = 4
+)
+SELECT e.matricule, e.nom, e.prenom
+FROM employes e
+WHERE e.num_service IN (SELECT num_service FROM service_employees);
