@@ -1,1 +1,1 @@
-
+explain analyze SELECT e.matricule, e.nom, e.prenom FROM employes e  WHERE e.num_service in (select num_service from employes e where e.num_service=4);
