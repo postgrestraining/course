@@ -39,3 +39,29 @@ WITH service_employees AS (
 SELECT e.matricule, e.nom, e.prenom
 FROM employes e
 WHERE e.num_service IN (SELECT num_service FROM service_employees);
+
++++
+
+EXPLAIN
+SELECT matricule, nom, prenom, nom_service, fonction, localisation
+FROM employes emp
+JOIN services ser ON (emp.num_service = ser.num_service)
+WHERE ser.localisation = 'Nantes';
+
++++
+
+EXPLAIN
+WITH e AS ( SELECT * FROM employes WHERE num_service = 4 )
+SELECT MAX(date_embauche)
+FROM e
+WHERE e.date_embauche < '2006-01-01';
+
+EXPLAIN
+SELECT *
+FROM employes emp
+JOIN (SELECT * FROM services WHERE num_service = 1) ser
+ON (emp.num_service = ser.num_service) ;
+
+++++
+
+
