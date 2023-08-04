@@ -1,3 +1,23 @@
+
+EXPLAIN (ANALYZE, COSTS OFF)
+SELECT SUM (reglements.montant) AS somme_reglements
+FROM factures
+INNER JOIN reglements USING (numero_facture)
+INNER JOIN commandes USING (numero_commande)
+INNER JOIN clients cl USING (client_id)
+INNER JOIN types_clients USING (type_client)
+INNER JOIN lignes_commandes lc USING (numero_commande)
+INNER JOIN lots l ON (l.numero_lot = lc.numero_lot_expedition)
+INNER JOIN transporteurs USING (transporteur_id)
+INNER JOIN contacts ct ON (ct.contact_id = cl.contact_id)
+WHERE transporteurs.nom = 'Royal Air Drone'
+AND login = 'Beatty_Brahem' ;
+
+SET max_parallel_workers_per_gather TO 0;
+SET join_collapse_limit TO 9 ;
+
+cost = blocks * seq_page_cost + number_of_records * cpu_tuple_cost
+
 explain analyze 
 SELECT 
   e.matricule, 
