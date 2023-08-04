@@ -63,5 +63,22 @@ JOIN (SELECT * FROM services WHERE num_service = 1) ser
 ON (emp.num_service = ser.num_service) ;
 
 ++++
+sudo iotop -oP
+sar -p -d -b 1
 
+++++
+
+EXPLAIN (ANALYZE, COSTS OFF)
+SELECT SUM (reglements.montant) AS somme_reglements
+FROM factures
+INNER JOIN reglements USING (numero_facture)
+INNER JOIN commandes USING (numero_commande)
+INNER JOIN clients cl USING (client_id)
+INNER JOIN types_clients USING (type_client)
+INNER JOIN lignes_commandes lc USING (numero_commande)
+INNER JOIN lots l ON (l.numero_lot = lc.numero_lot_expedition)
+INNER JOIN transporteurs USING (transporteur_id)
+INNER JOIN contacts ct ON (ct.contact_id = cl.contact_id)
+WHERE transporteurs.nom = 'Royal Air Drone'
+AND login = 'Beatty_Brahem' ;
 
