@@ -1,3 +1,4 @@
+\pset pager off
 
 EXPLAIN (ANALYZE, COSTS OFF)
 SELECT SUM (reglements.montant) AS somme_reglements
