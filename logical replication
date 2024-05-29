@@ -1,0 +1,56 @@
+	Handling limitations
+	-----------------------
+	
+	ALTER SEQUENCE  <seq_name> restart with <number>;
+	
+	alter table category add column budget int;
+	see error and execute the same in standby
+	
+	
+	ADD A NEW TABLE
+	ALTER SUBSCRIPTION my_subscription REFRESH PUBLICATION ;
+	
+	TRUNCATE OPERATION
+	------------------
+	
+-- On the publisher
+CREATE TABLE parent_table (
+    id SERIAL PRIMARY KEY,
+    data TEXT
+);
+
+CREATE TABLE child_table (
+    id SERIAL PRIMARY KEY,
+    parent_id INT REFERENCES parent_table(id),
+    data TEXT
+);
+
+-- Insert initial data
+INSERT INTO parent_table (data) VALUES ('Parent row 1'), ('Parent row 2');
+INSERT INTO child_table (parent_id, data) VALUES (1, 'Child row 1'), (2, 'Child row 2');
+
+CREATE PUBLICATION my_tt FOR TABLE parent_table;
+
+-- subscriber
+
+-- On the publisher
+CREATE TABLE parent_table (
+    id SERIAL PRIMARY KEY,
+    data TEXT
+);
+
+CREATE TABLE child_table (
+    id SERIAL PRIMARY KEY,
+    parent_id INT REFERENCES parent_table(id),
+    data TEXT
+);
+
+CREATE SUBSCRIPTION my_stt  CONNECTION 'host=192.168.110.216 port=5432 dbname=tt' PUBLICATION my_tt;
+
+select * from parent_table;
+
+-- truncate in primary
+
+TRUNCATE parent_table CASCADE;
+
+-- standby is not truncated, see logs.
