@@ -1,0 +1,21 @@
+CREATE TABLE dept (
+    dept_id SERIAL PRIMARY KEY,
+    dept_name VARCHAR(100) NOT NULL
+);
+
+
+CREATE TABLE emp (
+    emp_id SERIAL PRIMARY KEY,
+    emp_name VARCHAR(100) NOT NULL,
+    dept_id INT REFERENCES dept(dept_id) 
+);
+
+insert into dept(dept_name) values ('IT');
+
+insert into emp(emp_name, dept_id) values ('ABC','1');
+
+CREATE PUBLICATION my_tt FOR TABLE dept;
+
+CREATE SUBSCRIPTION my_stt  CONNECTION 'host=192.168.110.216 port=5432 dbname=tt' PUBLICATION my_tt;
+
+TRUNCATE emp CASCADE;
