@@ -1,17 +1,17 @@
-	Handling limitations
-	-----------------------
-	
-	ALTER SEQUENCE  <seq_name> restart with <number>;
-	
-	alter table category add column budget int;
-	see error and execute the same in standby
-	
-	
-	ADD A NEW TABLE
-	ALTER SUBSCRIPTION my_subscription REFRESH PUBLICATION ;
-	
-	TRUNCATE OPERATION
-	------------------
+Handling limitations
+-----------------------
+
+ALTER SEQUENCE  <seq_name> restart with <number>;
+
+alter table category add column budget int;
+see error and execute the same in standby
+
+
+ADD A NEW TABLE
+ALTER SUBSCRIPTION my_subscription REFRESH PUBLICATION ;
+
+TRUNCATE OPERATION
+------------------
 	
 -- On the publisher
 CREATE TABLE parent_table (
