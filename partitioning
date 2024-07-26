@@ -1,0 +1,164 @@
+List partition
+-------------------
+
+create table emp (id int,sal int) partition by list (id);
+
+create table emp_1 partition of emp for values IN (1,4,6);
+create table emp_2 partition of emp for values IN (2,3,5);
+create table emp_3 partition of emp for values IN (8,9);
+
+insert into emp values(1,100);
+insert into emp values(2,100);
+
+\d+ emp
+
+insert into emp values(10,100);
+
+Range Partition
+-------------------
+
+create table emp(id int, sal int) partition by range (id);
+create table emp_1 partition of emp for values from (1) to (100);
+create table emp_2 partition of emp for values from (100) to (200);
+create table emp_3 partition of emp for values from (200) to (MAXVALUE);
+
+
+Hash partition
+-----------------
+
+create table emp (id int,sal int) partition by hash (id);
+create table emp_1 partition of emp for values with (modulus 3,remainder 0);
+create table emp_2 partition of emp for values with (modulus 3,remainder 1);
+create table emp_3 partition of emp for values with (modulus 3,remainder 2);
+
+INSERT INTO  emp SELECT generate_series(1, 100000);
+
+SELECT relname, count(*) FROM emp
+JOIN pg_class ON emp.tableoid=pg_class.oid
+GROUP BY 1;
+
+Default partition
+----------------------
+
+
+
+create table emp (id int,sal int) partition by list (id);
+
+create table emp_1 partition of emp for values IN (1,4,6);
+create table emp_2 partition of emp for values IN (2,3,5);
+create table emp_3 partition of emp for values IN (8,9);
+
+CREATE TABLE emp_others PARTITION OF emp DEFAULT ;
+
+insert into emp values(32432,3423);
+
+CREATE TABLE emp_4 (LIKE emp INCLUDING ALL) ;
+
+ALTER TABLE emp ATTACH PARTITION emp_4 FOR VALUES IN (32432) ;
+
+postgres=# ALTER TABLE emp ATTACH PARTITION emp_4 FOR VALUES IN (32432) ;
+ERROR:  updated partition constraint for default partition "emp_others" would be violated by some row
+postgres=#
+
+alter table emp_4 add constraint emp_4_ck check (id is not null and id = 32432);
+
+begin;
+insert into emp_4 select * from emp_others where id=32432;
+delete from emp_others where id=32432;
+ALTER TABLE emp ATTACH PARTITION emp_4 FOR VALUES IN (32432) ;
+commit;
+
+Detaching a table
+-----------------
+
+ALTER TABLE emp DETACH PARTITION emp_4;
+
+
+
+
+Real time example.,
+----------------------
+
+
+alter table ticket_flights rename to ticket_flights_bkp;
+
+select distinct fare_conditions from ticket_flights_bkp;
+
+create table ticket_flights (like ticket_flights_bkp  INCLUDING CONSTRAINTS) PARTITION BY LIST (fare_conditions);
+
+CREATE TABLE ticket_flights_1 PARTITION of ticket_flights FOR VALUES IN ('Business') ;
+CREATE TABLE ticket_flights_2 PARTITION of ticket_flights FOR VALUES IN ('Comfort') ;
+CREATE TABLE ticket_flights_3 PARTITION of ticket_flights FOR VALUES IN ('Economy') ;
+
+insert into ticket_flights select * from ticket_flights_bkp;
+
+ALTER TABLE ticket_flights
+ADD CONSTRAINT ticket_flights_flight_id_fkey FOREIGN KEY (flight_id)
+REFERENCES flights(flight_id);
+
+ALTER TABLE ticket_flights
+ADD CONSTRAINT ticket_flights_ticket_no_fkey FOREIGN KEY (ticket_no)
+REFERENCES tickets(ticket_no);
+
+ALTER TABLE ticket_flights
+ADD PRIMARY KEY (ticket_no, flight_id);
+
+[or]
+
+ALTER TABLE ticket_flights
+ADD PRIMARY KEY (ticket_no, flight_id, fare_conditions);
+
+
+demo=# select distinct fare_conditions from ticket_flights;
+ fare_conditions
+-----------------
+ Business
+ Comfort
+ Economy
+(3 rows)
+
+demo=#
+
+
+demo=# insert into ticket_flights values ('0005433367999','30625','Flex',7876.00);
+ERROR:  no partition of relation "ticket_flights" found for row
+DETAIL:  Partition key of the failing row contains (fare_conditions) = (Flex).
+demo=#
+
+create table ticket_flights_default partition of ticket_flights default;
+
+insert into ticket_flights values ('0005433367999','30625','Flex',7876.00);
+
+-- Drop the existing check constraint
+ALTER TABLE ticket_flights
+DROP CONSTRAINT ticket_flights_fare_conditions_check;
+
+-- Add the updated check constraint with the new condition
+ALTER TABLE ticket_flights
+ADD CONSTRAINT ticket_flights_fare_conditions_check CHECK (
+    fare_conditions::text = ANY (
+        ARRAY['Economy', 'Comfort', 'Business', 'Flex']
+    )
+);
+
+
+demo=# CREATE TABLE ticket_flights_4 PARTITION of ticket_flights FOR VALUES IN ('Flex') ;
+ERROR:  updated partition constraint for default partition "ticket_flights_default" would be violated by some row
+demo=#
+
+
+demo=# begin;
+BEGIN
+demo=*# alter table ticket_flights detach partition ticket_flights_default;
+ALTER TABLE
+demo=*# CREATE TABLE ticket_flights_4 PARTITION of ticket_flights FOR VALUES IN ('Flex') ;
+CREATE TABLE
+demo=*# INSERT INTO  ticket_flights select * from ticket_flights_default where fare_conditions='Flex';
+INSERT 0 1
+demo=*# delete from ticket_flights_default where fare_conditions='Flex';
+DELETE 1
+demo=*# alter table ticket_flights attach  partition ticket_flights_default default;
+ALTER TABLE
+demo=*# commit;
+COMMIT
+demo=#
