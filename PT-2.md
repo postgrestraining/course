@@ -52,3 +52,31 @@ Query 2: Joins are performed in the order booking, then account, then frequent_f
 
 Query 1: Uses USING clauses for joining. The USING clause simplifies the join condition by using the common column name directly, assuming that columns with the same name in both tables are used for the join.
 Query 2: Uses ON clauses for joining, specifying the exact join conditions. This is more explicit and can be clearer, especially when dealing with multiple join conditions or non-matching column names.
+
+### with CTE
+
+```
+WITH booking_first AS (
+    SELECT 
+        b.account_id 
+    FROM 
+        booking b
+)
+SELECT
+    a.account_id,
+    a.login,
+    f.last_name,
+    f.first_name,
+    COUNT(*) AS num_bookings
+FROM
+    booking_first bf
+JOIN
+    account a ON bf.account_id = a.account_id
+JOIN
+    frequent_flyer f ON a.frequent_flyer_id = f.frequent_flyer_id
+WHERE
+    LOWER(f.last_name) = 'smith'
+    AND LOWER(a.login) LIKE 'smith%'
+GROUP BY
+    a.account_id, a.login, f.last_name, f.first_name;
+```
