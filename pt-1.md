@@ -226,6 +226,55 @@ JOIN enrolled_students es ON sd.student_id = es.student_id
 GROUP BY sd.student_id, sd.first_name, sd.last_name;
 ```
 
+# Identify student with more than one course
 
+```
+WITH instructor_courses AS (
+    -- Step 1: Get the courses taught by Jacob Brown
+    SELECT c.course_id
+    FROM courses c
+    JOIN instructors i ON c.instructor_id = i.instructor_id
+    WHERE i.first_name = 'Jacob' AND i.last_name = 'Brown'
+),
+enrolled_students AS (
+    -- Step 2: Get student enrollments for courses taught by Jacob Brown
+    SELECT e.student_id, e.course_id
+    FROM enrollments e
+    JOIN instructor_courses ic ON e.course_id = ic.course_id
+),
+student_course_count AS (
+    -- Step 3: Count courses for each student
+    SELECT e.student_id, COUNT(e.course_id) AS course_count
+    FROM enrolled_students e
+    GROUP BY e.student_id
+),
+student_details AS (
+    -- Step 4: Get student details for those with more than one course
+    SELECT s.student_id, s.first_name, s.last_name, sc.course_count
+    FROM students s
+    JOIN student_course_count sc ON s.student_id = sc.student_id
+    WHERE sc.course_count > 1
+)
+-- Final selection
+SELECT student_id, first_name, last_name, course_count
+FROM student_details;
+```
+
+#### OR
+
+```
+SELECT
+    s.student_id,
+    s.first_name,
+    s.last_name,
+    COUNT(c.course_id) AS course_count
+FROM students s
+JOIN enrollments e ON s.student_id = e.student_id
+JOIN courses c ON e.course_id = c.course_id
+JOIN instructors i ON c.instructor_id = i.instructor_id
+WHERE i.first_name = 'Jacob' AND i.last_name = 'Brown'
+GROUP BY s.student_id, s.first_name, s.last_name
+HAVING COUNT(c.course_id) > 1;
+```
 
 
