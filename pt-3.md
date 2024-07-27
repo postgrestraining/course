@@ -13,6 +13,8 @@ JOIN passenger p USING (booking_id)
 GROUP BY 1,2) a
 WHERE flight_id=222183;
 
+[or]
+
 SELECT bl.flight_id,
 departure_airport,
 (avg(price))::numeric (7,2) AS avg_price,
@@ -44,3 +46,45 @@ Query 2: Filters the data first (i.e., only records for flight_id = 222183 are a
 
 Query 1: The use of a subquery adds an extra layer of complexity and might be harder to read and understand, especially for those not familiar with subqueries.
 Query 2: More straightforward as it combines filtering and aggregation in a single step, making it easier to follow.
+
+### Query output
+
+```
+
+postgres=# SELECT * FROM
+(SELECT bl.flight_id,
+departure_airport,
+(avg(price))::numeric (7,2) AS avg_price,
+count(DISTINCT passenger_id) AS num_passengers
+FROM booking b
+JOIN booking_leg bl USING (booking_id)
+JOIN flight f USING (flight_id)
+JOIN passenger p USING (booking_id)
+GROUP BY 1,2) a
+WHERE flight_id=222183;
+ flight_id | departure_airport | avg_price | num_passengers
+-----------+-------------------+-----------+----------------
+    222183 | ORD               |   1054.33 |            292
+(1 row)
+
+Time: 4333.464 ms (00:04.333)
+
+postgres=# SELECT bl.flight_id,
+departure_airport,
+(avg(price))::numeric (7,2) AS avg_price,
+count(DISTINCT passenger_id) AS num_passengers
+FROM booking b
+JOIN booking_leg bl USING (booking_id)
+JOIN flight f USING (flight_id)
+JOIN passenger p USING (booking_id)
+WHERE flight_id=222183
+GROUP BY 1,2;
+ flight_id | departure_airport | avg_price | num_passengers
+-----------+-------------------+-----------+----------------
+    222183 | ORD               |   1054.33 |            292
+(1 row)
+
+Time: 1316.465 ms (00:01.316)
+postgres=#
+postgres=#
+```
