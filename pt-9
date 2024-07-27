@@ -1,0 +1,86 @@
+```
+CREATE TABLE t1 (id integer);
+INSERT INTO t1 SELECT generate_series(1, 1000000);
+CREATE TABLE t2 (id integer);
+INSERT INTO t2 SELECT generate_series(1, 1000000);
+CREATE TABLE t3 (id integer);
+INSERT INTO t3 SELECT generate_series(1, 1000000);
+
+ANALYZE;
+
+postgres=#
+postgres=#
+postgres=# EXPLAIN (ANALYZE)
+  SELECT * FROM t1
+  JOIN t2 ON t1.id=t2.id
+  JOIN t3 ON t2.id=t3.id;
+                                                             QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------------------------
+ Hash Join  (cost=67600.00..123950.00 rows=2000000 width=12) (actual time=1096.721..2172.942 rows=2000000 loops=1)
+   Hash Cond: (t2.id = t1.id)
+   ->  Seq Scan on t2  (cost=0.00..28850.00 rows=2000000 width=4) (actual time=0.007..130.697 rows=2000000 loops=1)
+   ->  Hash  (cost=55100.00..55100.00 rows=1000000 width=8) (actual time=1092.341..1092.343 rows=1000000 loops=1)
+         Buckets: 1048576  Batches: 1  Memory Usage: 47255kB
+         ->  Hash Join  (cost=26925.00..55100.00 rows=1000000 width=8) (actual time=294.958..826.376 rows=1000000 loops=1)
+               Hash Cond: (t1.id = t3.id)
+               ->  Seq Scan on t1  (cost=0.00..14425.00 rows=1000000 width=4) (actual time=0.011..83.729 rows=1000000 loops=1)
+               ->  Hash  (cost=14425.00..14425.00 rows=1000000 width=4) (actual time=290.197..290.198 rows=1000000 loops=1)
+                     Buckets: 1048576  Batches: 1  Memory Usage: 43349kB
+                     ->  Seq Scan on t3  (cost=0.00..14425.00 rows=1000000 width=4) (actual time=0.013..64.125 rows=1000000 loops=1)
+ Planning Time: 0.110 ms
+ Execution Time: 2243.765 ms
+(13 rows)
+
+Time: 2244.127 ms (00:02.244)
+postgres=#  set join_collapse_limit=1;
+SET
+Time: 0.097 ms
+postgres=# EXPLAIN (ANALYZE)
+  SELECT * FROM t1
+  JOIN t2 ON t1.id=t2.id
+  JOIN t3 ON t2.id=t3.id;
+                                                          QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------------------
+ Hash Join  (cost=53850.00..137700.00 rows=2000000 width=12) (actual time=568.470..2678.606 rows=2000000 loops=1)
+   Hash Cond: (t1.id = t3.id)
+   ->  Hash Join  (cost=26925.00..83275.00 rows=2000000 width=8) (actual time=288.824..1482.715 rows=2000000 loops=1)
+         Hash Cond: (t2.id = t1.id)
+         ->  Seq Scan on t2  (cost=0.00..28850.00 rows=2000000 width=4) (actual time=0.011..157.646 rows=2000000 loops=1)
+         ->  Hash  (cost=14425.00..14425.00 rows=1000000 width=4) (actual time=283.994..283.995 rows=1000000 loops=1)
+               Buckets: 1048576  Batches: 1  Memory Usage: 43349kB
+               ->  Seq Scan on t1  (cost=0.00..14425.00 rows=1000000 width=4) (actual time=0.225..79.434 rows=1000000 loops=1)
+   ->  Hash  (cost=14425.00..14425.00 rows=1000000 width=4) (actual time=274.590..274.590 rows=1000000 loops=1)
+         Buckets: 1048576  Batches: 1  Memory Usage: 43349kB
+         ->  Seq Scan on t3  (cost=0.00..14425.00 rows=1000000 width=4) (actual time=0.016..61.351 rows=1000000 loops=1)
+ Planning Time: 0.107 ms
+ Execution Time: 2743.840 ms
+(13 rows)
+
+Time: 2744.191 ms (00:02.744)
+postgres=# set join_collapse_limit=3;
+SET
+Time: 0.089 ms
+postgres=# EXPLAIN (ANALYZE)
+  SELECT * FROM t1
+  JOIN t2 ON t1.id=t2.id
+  JOIN t3 ON t2.id=t3.id;
+                                                             QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------------------------
+ Hash Join  (cost=67600.00..123950.00 rows=2000000 width=12) (actual time=1165.439..2305.825 rows=2000000 loops=1)
+   Hash Cond: (t2.id = t1.id)
+   ->  Seq Scan on t2  (cost=0.00..28850.00 rows=2000000 width=4) (actual time=0.009..133.487 rows=2000000 loops=1)
+   ->  Hash  (cost=55100.00..55100.00 rows=1000000 width=8) (actual time=1158.513..1158.516 rows=1000000 loops=1)
+         Buckets: 1048576  Batches: 1  Memory Usage: 47255kB
+         ->  Hash Join  (cost=26925.00..55100.00 rows=1000000 width=8) (actual time=304.774..865.659 rows=1000000 loops=1)
+               Hash Cond: (t1.id = t3.id)
+               ->  Seq Scan on t1  (cost=0.00..14425.00 rows=1000000 width=4) (actual time=0.055..85.875 rows=1000000 loops=1)
+               ->  Hash  (cost=14425.00..14425.00 rows=1000000 width=4) (actual time=292.906..292.908 rows=1000000 loops=1)
+                     Buckets: 1048576  Batches: 1  Memory Usage: 43349kB
+                     ->  Seq Scan on t3  (cost=0.00..14425.00 rows=1000000 width=4) (actual time=0.015..64.467 rows=1000000 loops=1)
+ Planning Time: 0.119 ms
+ Execution Time: 2369.809 ms
+(13 rows)
+
+Time: 2370.286 ms (00:02.370)
+postgres=#
+```
