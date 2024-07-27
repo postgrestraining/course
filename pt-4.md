@@ -60,7 +60,7 @@ Query 2: Uses a subquery, which might make it more complex but can provide bette
 
 ### Result
 
-
+```
 postgres=# explain analyze
 SELECT
 city,
@@ -163,4 +163,4 @@ ORDER BY 3 DESC;
 
 Time: 36737.611 ms (00:36.738)
 postgres=#
-
+```
