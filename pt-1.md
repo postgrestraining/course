@@ -161,3 +161,71 @@ WHERE e.course_id IN (
 postgres=#
 
 ```
+
+## Final dataset with sub query
+
+```
+SELECT e.student_id, s.first_name, s.last_name, COUNT(e.course_id) AS course_count
+FROM enrollments e
+JOIN students s ON e.student_id = s.student_id
+WHERE e.course_id IN (
+    SELECT c.course_id
+    FROM courses c
+    WHERE c.instructor_id = (
+        SELECT i.instructor_id
+        FROM instructors i
+        WHERE i.first_name = 'John' AND i.last_name = 'Doe'
+    )
+)
+GROUP BY e.student_id, s.first_name, s.last_name;
+```
+
+## Final dataset with joins
+
+```
+SELECT e.student_id, s.first_name, s.last_name, COUNT(e.course_id) AS course_count
+FROM enrollments e
+JOIN students s ON e.student_id = s.student_id
+JOIN courses c ON e.course_id = c.course_id
+JOIN instructors i ON c.instructor_id = i.instructor_id
+WHERE i.first_name = 'John' AND i.last_name = 'Doe'
+GROUP BY e.student_id, s.first_name, s.last_name;
+```
+
+## Final dataset with CTE
+
+```
+WITH instructor_info AS (
+    -- Step 1: Get the instructor ID for John Doe
+    SELECT instructor_id
+    FROM instructors
+    WHERE first_name = 'John' AND last_name = 'Doe'
+),
+instructor_courses AS (
+    -- Step 2: Get the course IDs taught by John Doe
+    SELECT course_id
+    FROM courses
+    WHERE instructor_id IN (SELECT instructor_id FROM instructor_info)
+),
+enrolled_students AS (
+    -- Step 3: Get student enrollments for the courses taught by John Doe
+    SELECT e.student_id, e.course_id
+    FROM enrollments e
+    JOIN instructor_courses ic ON e.course_id = ic.course_id
+),
+student_details AS (
+    -- Step 4: Get student details for enrolled students
+    SELECT DISTINCT s.student_id, s.first_name, s.last_name
+    FROM students s
+    JOIN enrolled_students es ON s.student_id = es.student_id
+)
+-- Final selection: count courses per student
+SELECT sd.student_id, sd.first_name, sd.last_name, COUNT(es.course_id) AS course_count
+FROM student_details sd
+JOIN enrolled_students es ON sd.student_id = es.student_id
+GROUP BY sd.student_id, sd.first_name, sd.last_name;
+```
+
+
+
+
