@@ -19,3 +19,8 @@ track_functions = all/pl
 
 select * from profile.show_servers();
 
+select * from take_sample();
+-- do transactions
+select * from take_sample();
+
+psql -d postgres -Aqtc "SELECT get_report('local', 1, 2)" -o 1st_report.html
