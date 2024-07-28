@@ -1,9 +1,9 @@
 ### Retrieve Instructor ID
 
 ```
-SELECT instructor_id FROM instructors WHERE first_name = 'John' AND last_name = 'Doe';
+SELECT instructor_id FROM instructors WHERE first_name = 'Steven' AND last_name = 'Johnson';
 
-postgres=# SELECT instructor_id FROM instructors WHERE first_name = 'John' AND last_name = 'Doe';
+postgres=# SELECT instructor_id FROM instructors WHERE first_name = 'Steven' AND last_name = 'Johnson';
  instructor_id
 ---------------
              1
