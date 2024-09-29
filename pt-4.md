@@ -164,3 +164,14 @@ ORDER BY 3 DESC;
 Time: 36737.611 ms (00:36.738)
 postgres=#
 ```
+
+Advantages:
+
+The pre-aggregation could potentially reduce the amount of data being processed in the outer query, especially if there are many rows in boarding_pass for each flight_id.
+
+The two-step aggregation process might offer performance benefits if the dataset is large or highly distributed across flights.
+
+Query 1 is simpler and may work well for smaller datasets or when you're only interested in counting the boarding passes directly.
+
+Query 2 introduces a subquery for pre-aggregation and could be more efficient for larger datasets or complex queries that involve a lot of flights with many boarding passes. The two-step aggregation could lead to better performance depending on the data distribution.
+
